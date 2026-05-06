@@ -1,0 +1,35 @@
+# SSH配置模板
+# 将此配置添加到 ~/.ssh/config 文件中
+
+Host dev
+    HostName your-dev-server.com
+    User shamcleren
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    LogLevel ERROR
+
+# 如果使用跳板机
+Host dev-jump
+    HostName your-jump-server.com
+    User shamcleren
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host dev
+    HostName your-internal-dev-server.com
+    User shamcleren
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+    ProxyJump dev-jump
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+# 配置说明:
+# - HostName: 替换为实际的服务器地址
+# - User: 替换为实际的用户名
+# - IdentityFile: 确保私钥路径正确
+# - ProxyJump: 如果需要通过跳板机访问，取消注释并配置

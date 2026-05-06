@@ -1,0 +1,77 @@
+{
+  "AUTO-001": {
+    "intent": "troubleshoot",
+    "scenario": "naruto-dashboard-no-data",
+    "playbookId": "pb-naruto-dashboard-no-data"
+  },
+  "AUTO-002": {
+    "intent": "question",
+    "scenario": "dataid-basic-info",
+    "playbookId": "pb-dataid-basic-info"
+  },
+  "AUTO-003": {
+    "intent": "troubleshoot",
+    "scenario": "codev-dashboard-query-anomaly",
+    "playbookId": "pb-codev-dashboard-query-anomaly"
+  },
+  "AUTO-004": {
+    "intent": "troubleshoot",
+    "scenario": "cluster-40980-vcluster-compatibility",
+    "playbookId": "pb-cluster-40980-vcluster-compatibility"
+  },
+  "AUTO-005": {
+    "intent": "troubleshoot",
+    "scenario": "golden-shovel-oversea-drop-zero",
+    "playbookId": "pb-golden-shovel-oversea-drop-zero"
+  },
+  "AUTO-006": {
+    "intent": "troubleshoot",
+    "scenario": "dream-star-dataid-metric-anomaly",
+    "playbookId": "pb-dream-star-dataid-metric-anomaly"
+  },
+  "AUTO-007": {
+    "intent": "troubleshoot",
+    "scenario": "qcloud-exporter-redis-metric-no-data",
+    "playbookId": "pb-qcloud-exporter-redis-metric-no-data"
+  },
+  "AUTO-008": {
+    "intent": "troubleshoot",
+    "scenario": "cluster-41946-no-collection",
+    "playbookId": "pb-cluster-41946-no-collection"
+  },
+  "AUTO-009": {
+    "intent": "troubleshoot",
+    "scenario": "clarify-first-secret-rebuild",
+    "playbookId": "pb-clarify-first-secret-rebuild"
+  },
+  "AUTO-010": {
+    "intent": "troubleshoot",
+    "scenario": "process-collection-reload",
+    "playbookId": "pb-process-collection-reload"
+  },
+  "AUTO-011": {
+    "intent": "troubleshoot",
+    "scenario": "chatinnerservice-success-rate-promql",
+    "playbookId": "pb-chatinnerservice-success-rate-promql"
+  },
+  "AUTO-012": {
+    "intent": "troubleshoot",
+    "scenario": "servicemonitor-stale-target-leak",
+    "playbookId": "pb-servicemonitor-stale-target-leak"
+  },
+  "AUTO-013": {
+    "intent": "troubleshoot",
+    "scenario": "bkop-apm-service-cross-component-query",
+    "playbookId": "pb-bkop-apm-service-cross-component-query"
+  },
+  "AUTO-014": {
+    "intent": "troubleshoot",
+    "scenario": "bkmonitorbeat-high-cpu-basereport",
+    "playbookId": "pb-bkmonitorbeat-high-cpu-basereport"
+  },
+  "AUTO-015": {
+    "intent": "troubleshoot",
+    "scenario": "windows-bkmonitorbeat-inittempdir",
+    "playbookId": "pb-windows-bkmonitorbeat-inittempdir"
+  }
+}

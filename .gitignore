@@ -1,0 +1,168 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# 环境变量（包含密钥）
+.env
+backend/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# AI assistant local state and private rules
+.agents/
+.claude/
+.codebuddy/
+.cursor/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+out/
+dist/
+
+# macOS
+.DS_Store
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 日志
+*.log
+logs/
+
+# Git worktrees
+.worktrees/
+
+# 本地产物与工作区临时目录
+/memory/
+/v1/coverage/
+/eval/reports/
+/v2/eval/reports/
+
+# 数据库
+*.db
+*.sqlite
+
+# 临时文件
+*.tmp
+.cache/
+
+# K8s Secrets（不提交敏感信息）
+k8s/mvp/secret.yaml
+v1/k8s/secrets.env
+
+# 计划文件
+*.plan.md
+
+# 敏感信息配置（绝对不能提交）
+.env.secrets
+.env.local
+.env.secret
+.env.secrets.*
+.env.secret.*
+*.secrets
+*.secret
+*.secret.*
+*.secrets.*
+*.pem
+*.pfx
+*.p12
+*.key
+!v1/src/services/user-token-manager.ts
+
+# 本地开发配置（包含敏感信息，不提交）
+scripts/dev/config.local.sh
+scripts/dev/*.local
+scripts/dev/*ssh*
+scripts/dev/.port-forward.pid
+
+# 本地配置备份（包含敏感信息，不提交）
+config/local-backup.yaml
+config/local-backup-*.yaml
+verify-restored-config.sh
+
+# K8s真实配置（包含敏感信息，不提交）
+k8s/mvp/current-working-secret.yaml
+k8s/mvp/current-working-configmap.yaml
+k8s/mvp/restored-*.yaml
+k8s/mvp/backup-*
+
+# 配置值备份（包含敏感信息，不提交）
+config/real-config-values.env
+config/config-values-backup-*.env
+
+# 测试文件生成的临时文件
+tests/temp_*
+tests/*.log
+tests/*.tmp
+
+# 项目清理后的备份
+*.backup
+*_old
+
+# 清理后的额外忽略规则
+config/real-config-values.env
+config/*.backup.*
+config/*backup*.env
+k8s/mvp/restored-*.yaml
+backend/.env
+*.bak
+
+# 测试文件中的敏感信息
+tests/*token*
+tests/*secret*
+tests/*key*
+tests/*.bak
+
+# 脚本清理备份
+scripts/**/backup-*/
+
+# SSH远程部署配置（本地文件，不提交）
+scripts/dev/ssh-config.local
+scripts/dev/*ssh*
+scripts/dev/*.local
+# K8s生成的配置文件（包含敏感信息）
+k8s/generated/
+*.secret.yaml
+*-secret.yaml
+# 环境变量文件
+.env
+.env.*
+!.env.example
+
+# 允许知识库文档（即使包含 secret/password 等关键词）
+!knowledge/**/*.md
+
+# Playwright CLI 浏览器测试产物（截图/日志/页面状态）
+.playwright-cli/
+
+# 验收/回归测试产物（报告/截图/JSON 结果）
+docs/verification/
+!docs/verification/
+docs/verification/*
+!docs/verification/VERIFICATION.MD
+!docs/verification/ITERATION-PLAN.MD
+!docs/verification/PROGRESS-REPORT.MD
+!docs/verification/LIVE-RUN-STATUS.MD
+!docs/verification/ARCHIVE/
+docs/verification/ARCHIVE/*
+!docs/verification/ARCHIVE/README.MD

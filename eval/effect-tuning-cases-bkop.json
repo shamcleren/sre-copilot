@@ -1,0 +1,362 @@
+{
+  "version": "1.0",
+  "created": "2026-03-17",
+  "updated": "2026-03-17",
+  "description": "bkop 环境效果调优回放集 — 基于上云环境 case 映射，使用 biz_id 2/7/10。带 __PLACEHOLDER__ 的字段需要通过 validation_queries 获取真实值后替换。",
+  "environment": {
+    "baseUrl": "https://unify-query.example.com/api/prod",
+    "spaceUidTemplate": "bkcc__{businessId}",
+    "bk_app_code": "bk_bkmonitorv3"
+  },
+  "categories": {
+    "A": "服务定位与对象定位",
+    "B": "现象真实性与查询正确性",
+    "C": "Telemetry-first 排障",
+    "D": "实体关联驱动排障",
+    "E": "协作式推进"
+  },
+  "cases": [
+    {
+      "id": "BKOP-A1",
+      "category": "A",
+      "subcategory": "A1",
+      "title": "无显式服务标识 — 应补材料",
+      "prompt": "查下我的服务情况",
+      "context": { "user_id": "sre-bkop", "businessId": "2" },
+      "expect": {
+        "action": "request_evidence",
+        "semantic_criteria": [
+          "回复应请求用户补充定位信息，如服务名、Pod名、域名、IP等具体标识",
+          "回复不应开始排查，而是先确认用户要查哪个服务"
+        ],
+        "must_not_contain": [],
+        "max_reply_length": 500,
+        "should_not_call_tools": ["k8s_management", "ssh_execute"],
+        "notes": "与上云 ET-A1 对齐：无法定位时首轮直接返回最小补充材料请求"
+      }
+    },
+    {
+      "id": "BKOP-A2",
+      "category": "A",
+      "subcategory": "A2",
+      "title": "有显式服务名 — 应继续排查 (biz 2)",
+      "prompt": "看下 unify-query 现在什么情况",
+      "context": { "user_id": "sre-bkop", "businessId": "2" },
+      "expect": {
+        "action": "continue_investigation",
+        "must_not_action": "request_evidence",
+        "preferred_tool_classes": ["unify_query"],
+        "should_resolve_service": true,
+        "notes": "对标 ET-A2。biz 2 下的 unify-query 服务。系统应直接进入 telemetry 查询。"
+      },
+      "validation_queries": {
+        "description": "用于确认该服务在 bkop 环境可查的验证查询",
+        "query_log": {
+          "tool": "query_raw",
+          "params": {
+            "businessId": "2",
+            "queryList": [
+              {
+                "data_source": "bklog",
+                "table_id": "2_bklog.bkunify_query",
+                "query_string": "*"
+              }
+            ],
+            "startTime": "now-15m",
+            "endTime": "now",
+            "limit": 3
+          },
+          "purpose": "验证 biz 2 下 unify-query 日志可查"
+        }
+      }
+    },
+    {
+      "id": "BKOP-A3",
+      "category": "A",
+      "subcategory": "A3",
+      "title": "有显式 Pod 名 — 应进入对象定位 + telemetry (biz 7)",
+      "prompt": "看下 pod __POD_NAME_BIZ7__ 为什么异常",
+      "context": { "user_id": "sre-bkop", "businessId": "7" },
+      "expect": {
+        "action": "continue_investigation",
+        "must_not_action": "request_evidence",
+        "preferred_tool_classes": ["unify_query"],
+        "should_resolve_service": true,
+        "notes": "对标 ET-A3。需要 biz_id=7 下一个真实 Pod 名。"
+      },
+      "validation_queries": {
+        "description": "确认该 Pod 在 bkop k8s 环境存在",
+        "k8s_check": {
+          "tool": "k8s_management",
+          "params": {
+            "action": "exec",
+            "businessId": "7",
+            "command": "get pods -n __NAMESPACE_BIZ7__ -o name | head -5"
+          },
+          "purpose": "列出 biz 7 下某 namespace 的 pod 列表"
+        },
+        "list_tag_values": {
+          "tool": "list_tag_values",
+          "params": {
+            "businessId": "7",
+            "table_id": "system.cpu_summary",
+            "data_source": "bkmonitor",
+            "keys": ["bk_target_ip"]
+          },
+          "purpose": "列出 biz 7 下的采集 IP，用于验证环境可达"
+        }
+      }
+    },
+    {
+      "id": "BKOP-B1",
+      "category": "B",
+      "subcategory": "B1",
+      "title": "用户说没数据 — 应先验证 PromQL/时间窗 (biz 2)",
+      "prompt": "__BIZ2_NAME__的监控数据查出来是空的，仪表盘上没有数据",
+      "context": { "user_id": "sre-bkop", "businessId": "2", "business": "__BIZ2_NAME__" },
+      "expect": {
+        "action": "continue_investigation",
+        "should_verify_before_conclude": true,
+        "semantic_criteria": [
+          "回复应分析监控数据为空的可能原因，如查询条件、时间范围、数据源配置、指标名称等",
+          "回复应基于实际查询结果进行分析，而非泛泛而谈",
+          "回复应给出具体的排查方向或发现"
+        ],
+        "notes": "对标 ET-B1。__BIZ2_NAME__ 替换为 biz 2 的业务名。"
+      },
+      "validation_queries": {
+        "description": "验证 biz 2 下是否真的有数据上报",
+        "query_promql": {
+          "tool": "query_promql",
+          "params": {
+            "businessId": "2",
+            "promql": "count(system_cpu_summary_usage{bk_biz_id=\"2\"})",
+            "start": "now-1h",
+            "end": "now",
+            "step": "60s"
+          },
+          "purpose": "验证 biz 2 下基础指标是否有数据（用 cpu_summary 作为基准）"
+        },
+        "list_tag_keys": {
+          "tool": "list_tag_keys",
+          "params": {
+            "businessId": "2",
+            "table_id": "system.cpu_summary",
+            "data_source": "bkmonitor"
+          },
+          "purpose": "列出 biz 2 下 cpu_summary 有哪些可查维度"
+        }
+      }
+    },
+    {
+      "id": "BKOP-B3",
+      "category": "B",
+      "subcategory": "B3",
+      "title": "用户提供 PromQL — 应优先 unify_query 验证 (biz 7)",
+      "prompt": "帮我看下这个 PromQL 为什么返回空值：sum(rate(__METRIC_NAME_BIZ7__{bk_biz_id=\"7\"}[5m])) by (status)",
+      "context": { "user_id": "sre-bkop", "businessId": "7" },
+      "expect": {
+        "action": "continue_investigation",
+        "preferred_tool_classes": ["unify_query"],
+        "must_not_first_tool": ["k8s_management", "ssh_execute"],
+        "notes": "对标 ET-B3。__METRIC_NAME_BIZ7__ 替换为 biz 7 真实可查的指标名。"
+      },
+      "validation_queries": {
+        "description": "确认该指标在 biz 7 存在",
+        "list_tag_keys": {
+          "tool": "list_tag_keys",
+          "params": {
+            "businessId": "7",
+            "table_id": "__TABLE_ID_BIZ7__",
+            "data_source": "bkmonitor"
+          },
+          "purpose": "确认 biz 7 下该表是否存在、有哪些维度"
+        },
+        "list_tag_values": {
+          "tool": "list_tag_values",
+          "params": {
+            "businessId": "7",
+            "table_id": "__TABLE_ID_BIZ7__",
+            "data_source": "bkmonitor",
+            "keys": ["status"]
+          },
+          "purpose": "确认 status 维度是否有值，以验证 PromQL 查询有效性"
+        }
+      }
+    },
+    {
+      "id": "BKOP-C1",
+      "category": "C",
+      "subcategory": "C1",
+      "title": "指标异常排障 — telemetry-first (biz 10)",
+      "prompt": "__BIZ10_NAME__的 __METRIC_DESC_BIZ10__ 突然掉零了，帮我排查一下",
+      "context": { "user_id": "sre-bkop", "businessId": "10", "business": "__BIZ10_NAME__" },
+      "expect": {
+        "action": "continue_investigation",
+        "semantic_criteria": [
+          "回复应针对指标掉零现象进行排查分析",
+          "回复应展示实际查询到的数据或错误信息",
+          "回复应给出掉零的可能原因或下一步排查建议"
+        ],
+        "must_not_first_tool": ["k8s_management", "ssh_execute"],
+        "notes": "对标 ET-C1。需要 biz 10 下一个真实的业务指标和描述（如：在线人数、请求量、错误率等）。"
+      },
+      "validation_queries": {
+        "description": "验证该指标在 biz 10 存在且有数据",
+        "query_promql": {
+          "tool": "query_promql",
+          "params": {
+            "businessId": "10",
+            "promql": "__PROMQL_BIZ10__",
+            "start": "now-1h",
+            "end": "now",
+            "step": "60s"
+          },
+          "purpose": "验证 biz 10 下该指标是否真的有数据"
+        }
+      }
+    },
+    {
+      "id": "BKOP-C4",
+      "category": "C",
+      "subcategory": "C4",
+      "title": "telemetry 不足时才下钻 k8s/ssh (biz 2)",
+      "prompt": "__COMPONENT_BIZ2__ 在某台机器上启动失败了，__ERROR_MSG_BIZ2__",
+      "context": { "user_id": "sre-bkop", "businessId": "2" },
+      "expect": {
+        "action": "continue_investigation",
+        "first_try_tool_classes": ["unify_query", "knowledge"],
+        "fallback_tool_classes": ["ssh", "k8s"],
+        "notes": "对标 ET-C4。需要 biz 2 下一个组件名和真实错误信息。"
+      },
+      "validation_queries": {
+        "description": "确认该组件在 biz 2 环境存在",
+        "list_tag_values": {
+          "tool": "list_tag_values",
+          "params": {
+            "businessId": "2",
+            "table_id": "system.proc_port",
+            "data_source": "bkmonitor",
+            "keys": ["display_name"]
+          },
+          "purpose": "列出 biz 2 下有哪些进程/组件名"
+        }
+      }
+    },
+    {
+      "id": "BKOP-D1",
+      "category": "D",
+      "subcategory": "D1",
+      "title": "Pod -> Service -> Deployment 关联 (biz 7)",
+      "prompt": "pod __POD_NAME_BIZ7_D1__ 一直在重启，帮我看看关联的 Service 和 Deployment 什么情况",
+      "context": { "user_id": "sre-bkop", "businessId": "7" },
+      "expect": {
+        "action": "continue_investigation",
+        "preferred_tool_classes": ["relation"],
+        "should_stitch_entities": true,
+        "entity_types": ["pod", "service", "deployment"],
+        "notes": "对标 ET-D1。需要 biz 7 下一个真实 Pod 名（k8s 环境中正在运行的）。"
+      },
+      "validation_queries": {
+        "description": "确认 Pod 存在且 relation 查询可用",
+        "relation_query": {
+          "tool": "query_relation_multi_resource",
+          "params": {
+            "businessId": "7",
+            "sourceType": "pod",
+            "sourceInfo": {
+              "bcs_cluster_id": "__BCS_CLUSTER_ID_BIZ7__",
+              "namespace": "__NAMESPACE_BIZ7__",
+              "pod": "__POD_NAME_BIZ7_D1__"
+            },
+            "targetType": "service"
+          },
+          "purpose": "验证 Pod → Service 关联查询是否返回数据"
+        }
+      }
+    },
+    {
+      "id": "BKOP-D4",
+      "category": "D",
+      "subcategory": "D4",
+      "title": "trace/log/metric 通过 relation 串联 (biz 10)",
+      "prompt": "trace_id __TRACE_ID_BIZ10__ 对应的请求报错了，帮我看看关联的 service 和 pod",
+      "context": { "user_id": "sre-bkop", "businessId": "10" },
+      "expect": {
+        "action": "continue_investigation",
+        "preferred_tool_classes": ["unify_query"],
+        "should_stitch_entities": true,
+        "entity_types": ["trace", "service", "pod"],
+        "notes": "对标 ET-D4。需要 biz 10 下一个真实的 trace_id。"
+      },
+      "validation_queries": {
+        "description": "确认 trace 数据在 biz 10 存在",
+        "query_trace": {
+          "tool": "query_trace",
+          "params": {
+            "businessId": "10",
+            "tableId": "__TRACE_TABLE_BIZ10__",
+            "dataSource": "bkapm",
+            "traceId": "__TRACE_ID_BIZ10__"
+          },
+          "purpose": "验证该 trace_id 能查到数据"
+        },
+        "list_recent_traces": {
+          "tool": "query_raw",
+          "params": {
+            "businessId": "10",
+            "queryList": [
+              {
+                "data_source": "bkapm",
+                "table_id": "__TRACE_TABLE_BIZ10__",
+                "query_string": "*"
+              }
+            ],
+            "startTime": "now-30m",
+            "endTime": "now",
+            "limit": 5
+          },
+          "purpose": "列出 biz 10 最近的 trace 记录，用于取一个真实 trace_id"
+        }
+      }
+    },
+    {
+      "id": "BKOP-E1",
+      "category": "E",
+      "subcategory": "E1",
+      "title": "工具不足 — 输出卡点和最小补充材料 (biz 2)",
+      "prompt": "我们有个自研的 __CUSTOM_COMPONENT_BIZ2__ 出问题了，数据没上报",
+      "context": { "user_id": "sre-bkop", "businessId": "2" },
+      "expect": {
+        "action": "collaborative_request",
+        "semantic_criteria": [
+          "回复应明确指出当前排查遇到的卡点或限制（如工具不足、数据未找到等）",
+          "回复应给出下一步排查建议或需要用户补充的信息",
+          "回复不应是一份泛化的排障手册或通用排查步骤清单"
+        ],
+        "must_not_contain_long_manual": true,
+        "max_reply_length": 2000,
+        "notes": "对标 ET-E1。__CUSTOM_COMPONENT_BIZ2__ 替换为 biz 2 下一个不在标准采集范围内的组件。"
+      }
+    },
+    {
+      "id": "BKOP-E4",
+      "category": "E",
+      "subcategory": "E4",
+      "title": "弱证据场景 — 禁止扩写泛化手册 (biz 10)",
+      "prompt": "有个服务偶尔超时，不确定是不是网络问题",
+      "context": { "user_id": "sre-bkop", "businessId": "10" },
+      "expect": {
+        "action": "collaborative_request",
+        "semantic_criteria": [
+          "回复应请求用户补充关键信息（如服务名、错误日志、超时详情等）",
+          "回复应体现对弱证据场景的谨慎态度，不应在信息不足时给出确定性结论",
+          "回复不应是一份泛化的排障手册或通用网络排查步骤"
+        ],
+        "must_not_contain_long_manual": true,
+        "max_reply_length": 2000,
+        "notes": "对标 ET-E4。弱证据场景不依赖特定环境数据，主要验证决策逻辑。"
+      }
+    }
+  ]
+}

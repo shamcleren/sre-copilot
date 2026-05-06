@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sre-copilot": {
+      "url": "https://sre-copilot.example.com/mcp/sse",
+      "transport": "sse",
+      "headers": {
+        "X-API-Key": "${MCP_API_KEY}"
+      }
+    }
+  }
+}
