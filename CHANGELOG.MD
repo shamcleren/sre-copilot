@@ -2,6 +2,12 @@
 
 ## [未发布] - 2026-03-16
 
+### 📘 README 公开仓库口径更新（2026-05-06）
+
+- **公开说明**: `README.MD` 已调整为 GitHub 公开仓库读者口径，明确当前仓库是清理后的 `V2` runtime/eval 快照，不包含本地密钥、私有助手状态、内网域名和内部 Git 历史。
+- **快速开始**: README 已把核心验证路径收口为 `npm ci`、`npm run v2:test`、`npm run v2:verify:core` 与 `workflow:*` 状态入口，便于新读者先完成本地验收。
+- **安全边界**: README 已补充公开占位配置、部署脚本使用前提与 secrets 规则，避免读者把示例域名、镜像仓库或 token 占位误认为真实生产配置。
+
 ### 📚 Knowledge Adapter 设计规格（2026-03-31）
 
 - **新增规格**: 新增 `docs/superpowers/specs/2026-03-31-KNOWLEDGE-ADAPTER-DESIGN.MD`，固定本轮 `knowledge` adapter 的最小增量设计：仅接通 `search_knowledge / mcp_search_knowledge`，保持 `V2 runtime` 主流程不变，并把真实执行结果纳入现有 `toolExecutions / evidence / blocker / conclusion / regression` 闭环。
