@@ -1,13 +1,13 @@
 # 文档索引（整理版）
 
-> 核心设计文档为 `docs/design/TECHNICAL-DESIGN.MD`。其余文档按用途归类，便于检索与维护。
+> 新路线核心设计为 `docs/design/SRE-COPILOT-PI-CORE-DESIGN.MD`。其余文档按用途归类，便于检索与维护。
 > 命名规范：所有 Markdown 文档文件名使用全大写（含扩展名 `.MD`）。
-> 当前口径：仓库已收敛为 **`V2 主运行时 + baseline compare 观察层 + 少量公共层`**；`docs/DOCS-INDEX.MD` 继续作为统一入口，默认以当前可执行流程和现行资产为准。
-> 默认续接顺序：`npm run workflow:resume` → `npm run workflow:verify` → `npm run workflow:handoff`；如只需刷新派生产物，则使用 `npm run workflow:refresh`。
+> 当前口径：已决定先执行 **Phase 0 完整退役旧 V2 及其工具链**，再进入唯一的 `agent/` Pi Core 路线。旧代码在 Phase 0 实际执行前仍存在，但禁止继续扩展。
+> 执行顺序：先评审并执行 legacy retirement plan；`clean:start:verify` 通过后，才允许执行 Phase 1 vertical slice plan。
 
 ## 核心设计
-- `docs/design/TECHNICAL-DESIGN.MD` - 核心技术架构设计（主文档，含 Agent Team 设计理念）
-- `docs/design/SRE-COPILOT-PI-CORE-DESIGN.MD` - 新一代 Pi SRE Copilot 独立 ActionPlan core 设计（写操作状态机、确定性策略、确认、幂等、复验与审计边界）
+- `docs/design/SRE-COPILOT-PI-CORE-DESIGN.MD` - 新一代 Pi SRE Copilot 主设计（Phase 0 干净基线、ActionPlan 状态机、确定性策略、确认、幂等、复验与审计边界）
+- `docs/design/TECHNICAL-DESIGN.MD` - 旧 runtime 技术设计（Phase 0 删除输入，删除后从 Git 历史查阅）
 - `docs/design/TROUBLESHOOTING-AUTOMATION-ASSESSMENT.MD` - 排障自动化现状评估与冻结结论
 - `docs/design/CURRENT-IMPLEMENTATION-MAP.MD` - 当前代码实现地图（主链路、入口差异、能力边界）
 - `docs/design/TROUBLESHOOTING-AUTOMATION-DESIGN.MD` - 排障自动化目标设计（意图 / playbook / 交互 / 工具 / 结论）
@@ -22,6 +22,7 @@
 - `docs/superpowers/specs/2026-03-30-WORKFLOW-ORCHESTRATOR-DESIGN.MD` - workflow orchestrator 设计规格（开发接手/续接流程状态机、统一命令面、迁移与验收策略）
 
 ## Superpowers / 计划
+- `docs/superpowers/plans/2026-08-14-SRE-COPILOT-LEGACY-RETIREMENT-PLAN.MD` - Phase 0 完整退役旧 runtime、eval、运行/部署工具链和活跃文档口径，并建立 clean-start guard
 - `docs/superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD` - Pi Core 第一阶段实施计划（仅覆盖 `demo-service` 5xx 告警 fake vertical slice）
 - `docs/superpowers/plans/2026-03-30-WORKFLOW-ORCHESTRATOR-IMPLEMENTATION-PLAN.MD` - workflow orchestrator 实现计划（共享状态源、状态机、CLI runner、命令接线与文档迁移）
 

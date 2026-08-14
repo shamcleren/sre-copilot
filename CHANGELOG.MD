@@ -5,11 +5,13 @@
 ### 🧭 Pi SRE Core 设计与实施规划（2026-08-14）
 
 - **新增设计**: 新增 `docs/design/SRE-COPILOT-PI-CORE-DESIGN.MD`，定稿独立 `agent/` core 的 ActionPlan 状态机、确定性 policy、planHash 确认、adapter、evidence、audit 与 Pi 边界。
-- **收敛范围**: 第一阶段只规划“为 `demo-service` 创建 5xx 错误率告警”这一条 fake vertical slice，不连接真实监控、SSH、Kubernetes、Git、CI/CD、企微或生产系统，也不修改旧 `v2/`。
+- **干净基线决策**: 新增 `docs/superpowers/plans/2026-08-14-SRE-COPILOT-LEGACY-RETIREMENT-PLAN.MD`，要求先完整删除旧 runtime、共享 eval、replay/compare/workflow、部署/本地运行工具链和旧活跃文档口径，不保留兼容副本。
+- **历史锚点**: 遗留系统由已推送提交 `7f81522` 保留；Phase 0 只清理当前工作树，不重写 Git 历史。
+- **强制顺序**: Phase 0 与 Phase 1 分开提交和验收；只有 `npm run clean:start:verify` 通过后才允许创建 `agent/`。
+- **收敛范围**: 第一阶段只规划“为 `demo-service` 创建 5xx 错误率告警”这一条 fake vertical slice，不连接真实监控、SSH、Kubernetes、Git、CI/CD、企微或生产系统，也不恢复遗留 runtime。
 - **新增计划**: 新增 `docs/superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD`，按失败测试、最小实现、通过验证和小提交拆分 8 个半手动实施任务。
-- **验证隔离**: 设计新增独立 `npm run agent:verify` 入口，要求完全离线且不依赖 LLM、网络、历史报告或 V1/V2 compare。
-- **基线记录**: 将旧 compare 在干净环境缺少历史 V1 replay 报告时的失败记录为 legacy baseline issue；本轮不伪造报告、不绕过失败，也不修复旧 V2。
-- **本轮限制**: 当前只生成并索引设计与计划文档；未安装依赖、未实现业务代码、未提交或推送。
+- **验证隔离**: Phase 0 建立独立 `clean:start:verify`，Phase 1 建立独立 `agent:verify`；两者都要求完全离线且不依赖 LLM、网络、历史报告或遗留 compare。
+- **本轮限制**: 当前只修订设计与计划，尚未执行任何 Phase 0 删除、依赖变更或业务实现。
 
 ### 📘 README 公开仓库口径更新（2026-05-06）
 

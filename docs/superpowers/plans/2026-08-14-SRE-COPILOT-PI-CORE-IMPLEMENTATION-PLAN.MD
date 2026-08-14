@@ -6,13 +6,15 @@
 
 **Goal:** 在独立 `agent/` 包内离线实现“为 `demo-service` 创建 5xx 错误率告警”的完整受控写操作路径，并证明 policy、确认、幂等、复验、审计和脱敏不变量。
 
-**Architecture:** Core contracts、确定性 policy、ActionPlan 状态机、fake alert adapter 和 audit/evidence 通过 ports 解耦；`ActionRuntime` 是唯一可以调用 adapter 写方法的组件。Pi 只预留为 `agent/src/index.ts` 公开 facade 的未来调用方，本阶段不安装 Pi 依赖、不创建 extension、不连接真实系统，也不修改 `v2/`。
+**Architecture:** 本计划从 Phase 0 已验收的干净基线开始。Core contracts、确定性 policy、ActionPlan 状态机、fake alert adapter 和 audit/evidence 通过 ports 解耦；`ActionRuntime` 是唯一可以调用 adapter 写方法的组件。Pi 只预留为 `agent/src/index.ts` 公开 facade 的未来调用方，本阶段不安装 Pi 依赖、不创建 extension、不连接真实系统，也不恢复任何遗留 runtime 或兼容入口。
 
 **Tech Stack:** TypeScript 5.9、Node.js 20+、`node:test`、`tsx`、Node `crypto`、Markdown；不新增第三方运行时或测试依赖。
 
 ---
 
 ## Scope guard
+
+强制前置条件：`docs/verification/LEGACY-RETIREMENT-ACCEPTANCE.MD` 已存在，且 `npm run clean:start:verify` 通过。任一条件不满足时停止，不创建 `agent/`，回到 Phase 0 修复根因。
 
 本计划只覆盖一个 vertical slice：
 
@@ -68,13 +70,13 @@ create demo-service 5xx alert
 
 ### Modify
 
-- `package.json` — 新增 `agent:typecheck`、`agent:test`、`agent:verify`，不改变任何 `v2:*` 脚本。
+- `package.json` — 在保留 `clean:start:verify` 的前提下新增 `agent:typecheck`、`agent:test`、`agent:verify`。
 - `docs/DOCS-INDEX.MD` — 加入第一阶段验收报告入口。
 - `CHANGELOG.MD` — 记录第一阶段实现和离线验证结果。
 
-### Explicitly untouched
+### Must remain absent or untouched
 
-- `v2/**`
+- `v2/**`、`eval/**`、旧 workflow/replay/compare/deploy 入口必须继续不存在。
 - `.pi/**`
 - `package-lock.json`
 - 真实环境配置、凭证与部署资产
@@ -95,6 +97,19 @@ create demo-service 5xx alert
 - Create: `agent/src/contracts/index.ts`
 - Create: `agent/tests/contracts.test.ts`
 - Modify: `package.json`
+
+- [ ] **Step 0: 验证 Phase 0 强制门禁**
+
+Run:
+
+```bash
+test -f docs/verification/LEGACY-RETIREMENT-ACCEPTANCE.MD
+npm run clean:start:verify
+test ! -e v2
+test ! -e eval
+```
+
+Expected: 四条检查全部退出 0，guard 输出 `clean-start verification: PASS`。失败时停止本计划并回到 Phase 0，不创建 `agent/`。
 
 - [ ] **Step 1: 写失败测试，锁定领域枚举和必需字段**
 
@@ -2700,18 +2715,19 @@ Run:
 npm run agent:verify
 ```
 
-Expected: PASS；先完成 strict TypeScript typecheck，再运行 `agent/tests/*.test.ts`，总计 `23 tests`、`0 fail`。输出不包含 V1/V2 compare、网络或历史报告读取。
+Expected: PASS；先完成 strict TypeScript typecheck，再运行 `agent/tests/*.test.ts`，总计 `23 tests`、`0 fail`。输出不包含遗留 compare、网络或历史报告读取。
 
-- [ ] **Step 8: 确认旧 V2 没有被修改**
+- [ ] **Step 8: 确认 clean-start 基线没有回流**
 
 Run:
 
 ```bash
+npm run clean:start:verify
 git diff --name-only origin/main...HEAD
 git status --short
 ```
 
-Expected: 已提交差异只包含 `agent/**` 与根 `package.json`；尚未提交的现场只允许出现本轮设计、计划、索引和变更记录文档；两条输出均不包含 `v2/` 或 `.pi/`。
+Expected: guard PASS；本阶段新增差异只包含 `agent/**` 与根 `package.json`；尚未提交的现场只允许出现本轮验收文档；输出不包含 `.pi/`、遗留 runtime、旧 eval 或部署入口。
 
 - [ ] **Step 9: Commit**
 
@@ -2749,7 +2765,7 @@ test('phase 1 acceptance is traceable from the repository documentation', () => 
   const changelog = readRepoFile('CHANGELOG.MD');
   assert.match(report, /npm run agent:verify/);
   assert.match(report, /24 tests.*0 fail/);
-  assert.match(report, /legacy baseline issue/i);
+  assert.match(report, /npm run clean:start:verify/);
   assert.match(index, /AGENT-CORE-PHASE-1-ACCEPTANCE\.MD/);
   assert.match(changelog, /Pi Core Phase 1/);
 });
@@ -2774,12 +2790,14 @@ Expected: FAIL，错误包含 `ENOENT` 和 `AGENT-CORE-PHASE-1-ACCEPTANCE.MD`。
 
 > 验收范围：`demo-service` 5xx 告警 fake vertical slice<br>
 > 结果：PASS<br>
+> 前置门禁：Phase 0 clean-start 已通过<br>
 > 环境：Node.js 20+，离线，无 LLM、网络、历史报告或真实 adapter
 
 ## 命令与结果
 
 | 命令 | 结果 |
 |---|---|
+| `npm run clean:start:verify` | PASS |
 | `npm run agent:typecheck` | PASS |
 | `npm run agent:test` | PASS，24 tests，0 fail |
 | `npm run agent:verify` | PASS |
@@ -2794,12 +2812,8 @@ Expected: FAIL，错误包含 `ENOENT` 和 `AGENT-CORE-PHASE-1-ACCEPTANCE.MD`。
 6. 复验失败时计划进入 `ROLLBACK_REQUIRED`，不会返回 `SUCCEEDED`。
 7. 每次状态变化都有对应 `STATE_CHANGED` AuditEvent。
 8. 用户可见事件未包含凭证、原始敏感日志或内部思维字段。
-9. `agent:verify` 不依赖 V1/V2 compare、LLM、网络或历史生成物。
-10. `v2/` 与 `.pi/` 未修改。
-
-## Legacy baseline issue
-
-旧验证链在干净环境缺少历史 V1 replay 报告时可能由 `compare-v1-v2.ts` 抛错。本阶段没有伪造报告、跳过失败或修改旧 V2；新 core 使用独立 `agent:verify`。
+9. `agent:verify` 不依赖遗留 compare、LLM、网络或历史生成物。
+10. `clean:start:verify` 继续通过，`.pi/` 未创建，遗留 runtime 和工具入口未回流。
 ```
 
 只有前三条命令实际全部通过后，才能按上述内容将结果写为 PASS。如果任一命令失败，先修复根因并重新运行，不创建虚假的成功记录。
@@ -2817,10 +2831,10 @@ Expected: FAIL，错误包含 `ENOENT` 和 `AGENT-CORE-PHASE-1-ACCEPTANCE.MD`。
 ```markdown
 ### 🧭 Pi Core Phase 1（2026-08-14）
 
-- **独立核心**: 新增 `agent/` TypeScript core，完成 `demo-service` 5xx 告警 fake vertical slice，不修改旧 `v2/`。
+- **独立核心**: 在 Phase 0 干净基线上新增 `agent/` TypeScript core，完成 `demo-service` 5xx 告警 fake vertical slice。
 - **写入治理**: 落地 ActionPlan 状态机、确定性 policy、planHash 确认、幂等 adapter、复验、审计和用户事件脱敏。
-- **独立验收**: 新增 `npm run agent:verify`，离线执行 24 项测试，不依赖 LLM、网络、历史报告或 V1/V2 compare。
-- **基线隔离**: 保留并记录旧 compare 在缺少历史 V1 replay 报告时的 legacy baseline issue，本阶段未修改旧 V2。
+- **独立验收**: 新增 `npm run agent:verify`，离线执行 24 项测试，不依赖 LLM、网络、历史报告或遗留 compare。
+- **基线守门**: `npm run clean:start:verify` 继续通过，遗留 runtime、eval 和部署入口未回流。
 ```
 
 - [ ] **Step 5: 运行文档 guard 和完整 gate**
@@ -2850,7 +2864,7 @@ Expected:
 - 第一条命令无输出，新建 Markdown 文件扩展名均为 `.MD`。
 - 第二条命令无匹配且退出 0。
 - Git 差异只包含 `agent/**`、`package.json`、本设计、实施计划、验收报告、`docs/DOCS-INDEX.MD` 和 `CHANGELOG.MD`。
-- 输出不包含 `v2/`、`.pi/`、真实环境配置或凭证文件。
+- 输出不包含 `.pi/`、遗留 runtime、旧 eval、真实环境配置或凭证文件。
 
 - [ ] **Step 7: Commit**
 
@@ -2885,8 +2899,8 @@ Expected: `agent:verify` PASS，测试摘要为 `24 tests`、`0 fail`；Git 工�
 - [ ] verification failure 的最终状态不是 `SUCCEEDED`。
 - [ ] 每个状态变化都有一条 `STATE_CHANGED` audit。
 - [ ] 用户可见事件不含秘密、原始日志或内部思维字段。
-- [ ] `npm run agent:verify` 不调用旧 V1/V2 compare。
-- [ ] `v2/` 和 `.pi/` 没有变更。
+- [ ] `npm run agent:verify` 不调用遗留 compare。
+- [ ] `npm run clean:start:verify` 通过，遗留 runtime/工具入口未回流，`.pi/` 未创建。
 - [ ] 未安装依赖、未连接网络或生产环境。
 
 ## Pi integration handoff

@@ -2,11 +2,13 @@
 
 > 日期：2026-08-14<br>
 > 状态：待评审<br>
-> 本轮边界：只完成约束、核心架构与第一阶段 vertical slice 设计；不实现业务代码，不连接真实系统，不安装 Pi 依赖，不提交或推送。
+> 本轮边界：只完成约束、遗留系统退役方案、核心架构与第一阶段 vertical slice 设计；不实现业务代码，不连接真实系统，不安装 Pi 依赖。
 
 ## 1. 结论
 
-新一代 SRE Copilot 应在独立的 `agent/` 包中建立一个与 Pi、监控厂商、SSH、Kubernetes 和具体 UI 解耦的 action runtime。Pi 只是首个 agent harness；未来 Web、企微、API 和定时任务都通过同一公开 runtime API 创建、确认和执行 `ActionPlan`。
+新一代 SRE Copilot 应先完成 **Phase 0 遗留系统退役**，再在唯一的 `agent/` 包中建立一个与 Pi、监控厂商、SSH、Kubernetes 和具体 UI 解耦的 action runtime。Pi 只是首个 agent harness；未来 Web、企微、API 和定时任务都通过同一公开 runtime API 创建、确认和执行 `ActionPlan`。
+
+Phase 0 不做兼容迁移：旧 `v2/`、共享 eval、旧 workflow/replay/compare、部署脚本和以旧 runtime 为主入口的文档从当前工作树移除。它们由已推送的 Git 提交 `7f81522` 保留历史，不在新结构旁继续运行。Phase 0 的完整清单和逐步验收见 `../superpowers/plans/2026-08-14-SRE-COPILOT-LEGACY-RETIREMENT-PLAN.MD`。
 
 第一阶段只交付一条离线、可重复、可完整验收的写操作路径：
 
@@ -31,7 +33,20 @@
 
 SRE Copilot 是具备“观测、设计、变更、发布、复验”能力的 SRE 操作 Agent。长期能力包括 telemetry 查询、监控配置、代码 telemetry 分析、代码变更、测试、发布、变更日历与故障时间线关联。
 
-### 2.2 第一阶段范围
+### 2.2 Phase 0：干净基线
+
+第一阶段业务实现开始前，仓库必须满足：
+
+1. `v2/`、`eval/` 及旧 replay/compare/workflow runtime 已删除。
+2. 根 `package.json`、Makefile、Docker、部署脚本和本地服务脚本不再暴露旧入口。
+3. 旧配置、知识样例和历史运行文档只保留在 Git 历史，不作为活跃资产留在工作树。
+4. `README.MD`、根工作清单、`docs/DOCS-INDEX.MD` 和 `AGENTS.MD` 只描述新的 `agent/` 路线。
+5. `npm run clean:start:verify` 可以从干净 checkout 离线证明以上约束。
+6. `docs/verification/LEGACY-RETIREMENT-ACCEPTANCE.MD` 记录实际删除范围、验证结果和历史锚点。
+
+Phase 0 是 Phase 1 的强制门禁，不允许与 Phase 1 混合提交，也不允许为了兼容旧入口保留桥接层。
+
+### 2.3 第一阶段范围
 
 第一阶段只实现以下九个动作，并只服务于“创建 `demo-service` 5xx 告警策略”：
 
@@ -47,10 +62,10 @@ SRE Copilot 是具备“观测、设计、变更、发布、复验”能力的 S
 
 第一阶段只使用 fake alert adapter 和内存存储。所有测试离线执行，不依赖 LLM、网络、数据库、历史报告或真实身份系统。
 
-### 2.3 第一阶段明确不做
+### 2.4 第一阶段明确不做
 
 - 不连接 BK Monitor、Kubernetes、SSH、Git、CI/CD、企微和生产系统。
-- 不扩展或改变 `v2/` 行为。
+- 不恢复、兼容或引用已在 Phase 0 退役的 `v2/`、旧 eval、replay、compare、workflow 和部署入口。
 - 不实现多租户、分布式锁、持久队列、真实 RBAC 和跨进程恢复。
 - 不承诺所有写操作都能自动回滚。
 - 不让 Pi 或 LLM 获得任意 shell、SSH 或底层 adapter 写权限。
@@ -106,7 +121,7 @@ Action Runtime          Policy Engine
 
 ## 4. 最终目录设计
 
-第一阶段定稿目录如下。每个文件只有一个主要职责：
+Phase 0 完成后，仓库只保留新路线所需的根文档、TypeScript 工具链、设计/计划/验收入口和一个 clean-start guard。Phase 1 在此基线上新增下列 `agent/` 目录；每个文件只有一个主要职责：
 
 ```text
 agent/
@@ -903,12 +918,13 @@ Pi 负责自然语言交互、计划/diff 展示、确认 UI 和流式事件渲�
 第一阶段新增独立入口：
 
 ```bash
+npm run clean:start:verify
 npm run agent:typecheck
 npm run agent:test
 npm run agent:verify
 ```
 
-`agent:verify` 只执行 `agent/tsconfig.json` typecheck 与 `agent/tests/*.test.ts`，不调用 `v2:*`、旧 compare、网络、LLM 或历史报告。
+`clean:start:verify` 先证明遗留 runtime、脚本和活跃文档入口没有回流。`agent:verify` 只执行 `agent/tsconfig.json` typecheck 与 `agent/tests/*.test.ts`，不调用旧 compare、网络、LLM 或历史报告。
 
 验收映射：
 
@@ -923,25 +939,27 @@ npm run agent:verify
 | 每次状态变化有 audit | runtime transition/audit parity case |
 | 用户事件不泄密或思维链 | `user-visible-events.test.ts` hostile payload case |
 | 全部测试离线 | `agent:verify` 入口测试与 package script review |
+| 遗留系统未回流 | `npm run clean:start:verify` |
 | 不调用旧 compare | root `agent:verify` script 精确断言/人工审查 |
-| 不修改旧 V2 | Git diff 路径检查 |
 
-## 15. Legacy baseline issue
+## 15. 遗留系统处置决定
 
-本轮接受并记录现有 legacy baseline issue，不在新核心中修复或绕过：
+旧系统只作为 Phase 0 的删除输入和 Git 历史存在，不再作为新核心的兼容基线：
 
-- 已知基线记录：`npm run v2:smoke` 通过。
-- 已知基线记录：`npm run v2:verify:core` 在干净环境失败，关联 `v2/eval/runners/compare-v1-v2.ts` 对历史 V1 replay 报告的查找。
-- 源码中的 `findBestMatchingV1Report()` 在 `eval/reports/` 与 `docs/verification/` 均没有匹配历史报告时会抛出 `No V1 replay reports found ...`。
-- 本轮不伪造报告、不跳过失败、不修改 `v2/`，也不把该失败作为新 core 的验收依赖。
-- 以上基线由任务说明提供；本轮是规划回合，没有重新运行会生成派生产物的旧验证链。
+- 最后一个已推送的完整旧系统快照是提交 `7f81522`，分支为 `origin/codex/pi-sre-core`。
+- 旧 `v2:verify:core` 对历史 V1 replay 报告的隐式依赖证明旧验证链无法作为干净 checkout 的新基线。
+- Phase 0 直接删除旧 runtime、共享 eval、replay/compare/workflow 和相关运行入口，不修补、不跳过、不复制历史报告。
+- 需要查阅旧实现时使用 Git 历史；当前工作树不保留可执行副本或兼容别名。
+- 新 core 的验收只依赖 `clean:start:verify` 和 `agent:verify`。
 
-新核心通过独立、离线、从空工作树可重复运行的 `npm run agent:verify` 避免继承该问题。
+这个决定用“历史可恢复、当前结构唯一”的方式取代长期双轨。
 
 ## 16. 后续路线图
 
-后续阶段仅保留方向，不进入第一阶段实施计划：
+阶段顺序固定如下：
 
+- Phase 0：完整退役遗留 runtime、工具链和活跃文档口径，建立 clean-start guard。
+- Phase 1：实现 `demo-service` 5xx 告警 fake vertical slice。
 - Phase 2：接入 dev-observe 只读查询和真实 evidence 模型。
 - Phase 3：告警、仪表盘和监控配置写操作。
 - Phase 4：代码 telemetry 分析、指标设计和 Trace 接入。
@@ -969,11 +987,13 @@ npm run agent:verify
 
 开始实施前应确认：
 
-1. `agent/` 作为独立 core 包，且不继续扩展 `v2/`。
-2. 第一阶段只包含 `demo-service` 5xx 告警创建。
-3. `ActionPlan` hash 覆盖 diff、风险和执行模式，状态字段不参与 hash。
-4. 任何 adapter apply 前必须重复执行 policy 与 approval gate。
-5. 复验失败进入 `ROLLBACK_REQUIRED`，不会返回 `SUCCEEDED`。
-6. fake adapter 的“同键同载荷去重、同键异载荷冲突”语义被接受。
-7. Pi 仅保留未来入口，本轮不安装依赖或实现 extension。
-8. legacy baseline issue 被隔离记录，不成为修改旧 V2 的理由。
+1. 提交 `7f81522` 作为旧系统历史锚点已经可从远端访问。
+2. Phase 0 必须完整删除旧 runtime、eval、脚本入口和活跃文档口径，不能只删除 `v2/`。
+3. Phase 0 与 Phase 1 分开提交和验收；`clean:start:verify` 通过后才开始创建 `agent/`。
+4. `agent/` 是唯一的新 core 包，禁止恢复旧目录或添加兼容桥。
+5. 第一阶段只包含 `demo-service` 5xx 告警创建。
+6. `ActionPlan` hash 覆盖 diff、风险和执行模式，状态字段不参与 hash。
+7. 任何 adapter apply 前必须重复执行 policy 与 approval gate。
+8. 复验失败进入 `ROLLBACK_REQUIRED`，不会返回 `SUCCEEDED`。
+9. fake adapter 的“同键同载荷去重、同键异载荷冲突”语义被接受。
+10. Pi 仅保留未来入口，本轮不安装依赖或实现 extension。
