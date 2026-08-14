@@ -2,6 +2,15 @@
 
 ## [未发布] - 2026-03-16
 
+### 🧭 Pi SRE Core 设计与实施规划（2026-08-14）
+
+- **新增设计**: 新增 `docs/design/SRE-COPILOT-PI-CORE-DESIGN.MD`，定稿独立 `agent/` core 的 ActionPlan 状态机、确定性 policy、planHash 确认、adapter、evidence、audit 与 Pi 边界。
+- **收敛范围**: 第一阶段只规划“为 `demo-service` 创建 5xx 错误率告警”这一条 fake vertical slice，不连接真实监控、SSH、Kubernetes、Git、CI/CD、企微或生产系统，也不修改旧 `v2/`。
+- **新增计划**: 新增 `docs/superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD`，按失败测试、最小实现、通过验证和小提交拆分 8 个半手动实施任务。
+- **验证隔离**: 设计新增独立 `npm run agent:verify` 入口，要求完全离线且不依赖 LLM、网络、历史报告或 V1/V2 compare。
+- **基线记录**: 将旧 compare 在干净环境缺少历史 V1 replay 报告时的失败记录为 legacy baseline issue；本轮不伪造报告、不绕过失败，也不修复旧 V2。
+- **本轮限制**: 当前只生成并索引设计与计划文档；未安装依赖、未实现业务代码、未提交或推送。
+
 ### 📘 README 公开仓库口径更新（2026-05-06）
 
 - **公开说明**: `README.MD` 已调整为 GitHub 公开仓库读者口径，明确当前仓库是清理后的 `V2` runtime/eval 快照，不包含本地密钥、私有助手状态、内网域名和内部 Git 历史。

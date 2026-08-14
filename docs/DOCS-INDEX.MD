@@ -7,6 +7,7 @@
 
 ## 核心设计
 - `docs/design/TECHNICAL-DESIGN.MD` - 核心技术架构设计（主文档，含 Agent Team 设计理念）
+- `docs/design/SRE-COPILOT-PI-CORE-DESIGN.MD` - 新一代 Pi SRE Copilot 独立 ActionPlan core 设计（写操作状态机、确定性策略、确认、幂等、复验与审计边界）
 - `docs/design/TROUBLESHOOTING-AUTOMATION-ASSESSMENT.MD` - 排障自动化现状评估与冻结结论
 - `docs/design/CURRENT-IMPLEMENTATION-MAP.MD` - 当前代码实现地图（主链路、入口差异、能力边界）
 - `docs/design/TROUBLESHOOTING-AUTOMATION-DESIGN.MD` - 排障自动化目标设计（意图 / playbook / 交互 / 工具 / 结论）
@@ -21,6 +22,7 @@
 - `docs/superpowers/specs/2026-03-30-WORKFLOW-ORCHESTRATOR-DESIGN.MD` - workflow orchestrator 设计规格（开发接手/续接流程状态机、统一命令面、迁移与验收策略）
 
 ## Superpowers / 计划
+- `docs/superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD` - Pi Core 第一阶段实施计划（仅覆盖 `demo-service` 5xx 告警 fake vertical slice）
 - `docs/superpowers/plans/2026-03-30-WORKFLOW-ORCHESTRATOR-IMPLEMENTATION-PLAN.MD` - workflow orchestrator 实现计划（共享状态源、状态机、CLI runner、命令接线与文档迁移）
 
 ## 使用说明
