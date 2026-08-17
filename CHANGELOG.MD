@@ -24,3 +24,8 @@
 - 创建 `agent/` 目录、contracts、alert plan、fake adapter、policy、core facade、公开入口和测试目录。
 - 每个核心函数目前只保留详细实现注释并显式抛出未实现错误；没有伪造成功结果或连接真实系统。
 - 新增 `agent:typecheck`、`agent:test` 和 `agent:verify`，当前仅验证骨架可编译、公开入口可加载和 clean-start 门禁。
+
+### 最小时间工具 Demo（2026-08-17）
+
+- 新增 `getCurrentTime()` 和 `npm run agent:time:demo`，返回时间、IANA 时区、UTC 偏移和模型配置标识。
+- 当前 Demo 不调用 Pi 或 LLM；模型未配置时明确返回 `not-configured`。

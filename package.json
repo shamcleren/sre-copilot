@@ -9,7 +9,8 @@
     "clean:start:verify": "bash scripts/test/verify-clean-start.sh",
     "agent:typecheck": "tsc -p agent/tsconfig.json --noEmit",
     "agent:test": "tsx --test agent/tests/*.test.ts",
-    "agent:verify": "npm run clean:start:verify && npm run agent:typecheck && npm run agent:test"
+    "agent:verify": "npm run clean:start:verify && npm run agent:typecheck && npm run agent:test",
+    "agent:time:demo": "tsx agent/examples/time-demo.ts"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

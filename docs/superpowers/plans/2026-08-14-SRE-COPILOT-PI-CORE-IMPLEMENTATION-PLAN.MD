@@ -44,6 +44,23 @@
 5. `createSreCore` facade 的 `proposeAlert/previewAlert/approveAlert/executeAlert` 四个公开方法。
 6. 6 个左右的离线测试，覆盖新建告警、确认、成功复验和复验失败。
 
+### First runnable exercise: time tool
+
+在实现告警核心之前，可以先用一个无副作用的时间工具熟悉 TypeScript tool 输入/输出：
+
+```text
+agent/src/time-tool.ts       # getCurrentTime(input) -> TimeToolResult
+agent/examples/time-demo.ts # 直接打印 JSON 结果
+```
+
+运行：
+
+```bash
+npm run agent:time:demo
+```
+
+输出字段固定为 `timestamp`、`localTime`、`timeZone`、`utcOffset` 和 `model`。没有 Pi 宿主或 `PI_MODEL`/`MODEL` 配置时，`model` 必须显示 `not-configured`；这一步不调用 LLM，也不创建 `.pi/` extension。
+
 ### v0 明确不做
 
 - 真实 BK Monitor、Prometheus、Kubernetes、SSH、Git、CI/CD、企微、Web API 和 Pi extension。

@@ -511,6 +511,7 @@ const allowedScripts = new Set([
   'agent:typecheck',
   'agent:test',
   'agent:verify',
+  'agent:time:demo',
 ]);
 for (const name of Object.keys(packageJson.scripts || {})) {
   if (!allowedScripts.has(name)) throw new Error(`unexpected npm script: ${name}`);

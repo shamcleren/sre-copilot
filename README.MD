@@ -18,3 +18,11 @@ SRE Copilot 正在以 Pi-compatible action runtime 的方向重新建立。旧 V
 ## 安全边界
 
 不要提交真实 `.env`、token、私钥、kubeconfig、Cookie、Authorization header 或生成的 Secret 文件。新 core 在接入任何真实系统前必须单独完成 adapter、权限、确认、审计和回滚评审。
+
+## 最小时间工具 Demo
+
+```bash
+npm run agent:time:demo
+```
+
+Demo 返回系统时间、IANA 时区、UTC 偏移和 `PI_MODEL`/`MODEL` 环境变量中的模型标识；没有配置时显示 `not-configured`。

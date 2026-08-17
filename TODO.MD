@@ -12,7 +12,9 @@
 
 ## Phase 1：Pi Core fake vertical slice
 
-- [ ] Phase 0 已验收，按实施计划逐 task 执行。
+- [x] Phase 0 已验收，按实施计划逐 task 执行。
 - [ ] 补齐 `agent/` 骨架中标记为未实现的核心函数。
+- [x] 创建最小时间工具 Demo，验证 tool 输入/输出和环境信息展示。
+- [ ] 将时间工具接入 `.pi/extensions/`，等待 Pi 版本确认后执行。
 - [ ] 只实现 `demo-service` 5xx 告警创建。
 - [ ] 完成离线 typecheck、测试和可追溯验收报告。

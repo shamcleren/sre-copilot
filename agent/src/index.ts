@@ -6,6 +6,7 @@
  */
 export { createSreCore } from './alert-core.js';
 export { FakeAlertAdapter } from './fake-alert-adapter.js';
+export { getCurrentTime } from './time-tool.js';
 export type {
   AlertAdapter,
   AlertExecutionResult,
@@ -14,3 +15,4 @@ export type {
   CreateAlertInput,
   SreCore,
 } from './contracts.js';
+export type { TimeToolInput, TimeToolResult } from './time-tool.js';
