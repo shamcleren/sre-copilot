@@ -18,6 +18,7 @@ kubeconfig*
 .codebuddy/
 .cursor/
 .serena/
+.idea/
 
 .DS_Store
 *.log

@@ -5,7 +5,7 @@ SRE Copilot 正在以 Pi-compatible action runtime 的方向重新建立。旧 V
 ## 当前状态
 
 - Phase 0：遗留系统退役已完成；`npm run clean:start:verify` 是后续开发的前置门禁。
-- Phase 1：尚未开始；只实现 `demo-service` 5xx 告警 fake vertical slice。
+- Phase 1：`agent/` 最小核心骨架已创建；函数体仍明确标记为未实现，下一步按计划逐个补齐。
 - 当前没有可连接生产环境的 runtime、部署入口或 Pi extension。
 
 ## 设计与计划

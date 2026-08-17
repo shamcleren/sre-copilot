@@ -18,3 +18,9 @@
 
 - 将 Phase 1 实施计划收敛为最小可读核心：目录职责、函数命名、实现骨架、测试步骤和官方参考地址。
 - 明确 v0 只覆盖单步骤 fake 告警的 inspect → preview → approve → apply → verify 主路径，复杂边界拆到后续独立计划。
+
+### Phase 1 核心骨架（2026-08-17）
+
+- 创建 `agent/` 目录、contracts、alert plan、fake adapter、policy、core facade、公开入口和测试目录。
+- 每个核心函数目前只保留详细实现注释并显式抛出未实现错误；没有伪造成功结果或连接真实系统。
+- 新增 `agent:typecheck`、`agent:test` 和 `agent:verify`，当前仅验证骨架可编译、公开入口可加载和 clean-start 门禁。

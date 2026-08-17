@@ -1,0 +1,5 @@
+{
+  "name": "@sre-copilot/agent",
+  "private": true,
+  "type": "module"
+}

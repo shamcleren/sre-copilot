@@ -13,5 +13,6 @@
 ## Phase 1：Pi Core fake vertical slice
 
 - [ ] Phase 0 已验收，按实施计划逐 task 执行。
+- [ ] 补齐 `agent/` 骨架中标记为未实现的核心函数。
 - [ ] 只实现 `demo-service` 5xx 告警创建。
 - [ ] 完成离线 typecheck、测试和可追溯验收报告。
