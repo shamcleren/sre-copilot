@@ -13,4 +13,4 @@
 
 ## 验收
 
-- Phase 0 完成后由 `docs/verification/LEGACY-RETIREMENT-ACCEPTANCE.MD` 记录 clean-start 验收。
+- [Phase 0 验收记录](verification/LEGACY-RETIREMENT-ACCEPTANCE.MD) - clean-start 删除范围与离线验证结果。

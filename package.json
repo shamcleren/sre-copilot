@@ -5,7 +5,9 @@
   "engines": {
     "node": ">=20"
   },
-  "scripts": {},
+  "scripts": {
+    "clean:start:verify": "bash scripts/test/verify-clean-start.sh"
+  },
   "devDependencies": {
     "@types/node": "^25.5.0",
     "tsx": "^4.21.0",
