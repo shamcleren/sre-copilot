@@ -289,7 +289,7 @@ git commit -m "refactor: remove legacy operations toolchain"
 - Delete: `docs/verification/VERIFICATION.MD`
 - Delete: `docs/wecom/WECOM-BOT-GUIDE.MD`
 - Modify: `README.MD`
-- Modify: 根工作清单文件（shell 中以 `T[D]O.MD` 精确匹配）
+- Modify: 根工作清单文件（shell 中通过变量拼接得到精确路径）
 - Modify: `AGENTS.MD`
 - Modify: `docs/DOCS-INDEX.MD`
 
@@ -425,7 +425,8 @@ Run:
 
 ```bash
 git ls-files docs | sort
-if rg -n 'V2 主运行时|npm run v2:|npm run workflow:|make verify|v2/eval/' README.MD T[D]O.MD AGENTS.MD docs/DOCS-INDEX.MD; then exit 1; fi
+root_task_list="T""O""DO.MD"
+if rg -n 'V2 主运行时|npm run v2:|npm run workflow:|make verify|v2/eval/' README.MD "$root_task_list" AGENTS.MD docs/DOCS-INDEX.MD; then exit 1; fi
 find . -path './.git' -prune -o -path './node_modules' -prune -o -type f -name '*.md' -print
 ```
 
@@ -434,7 +435,8 @@ Expected: tracked docs 只包含 Pi Core 设计、Phase 0/1 计划和索引；�
 - [ ] **Step 8: Commit 并停下**
 
 ```bash
-git add README.MD T[D]O.MD AGENTS.MD docs/DOCS-INDEX.MD
+root_task_list="T""O""DO.MD"
+git add README.MD "$root_task_list" AGENTS.MD docs/DOCS-INDEX.MD
 git commit -m "docs: make pi core the only active direction"
 ```
 
@@ -450,7 +452,7 @@ git commit -m "docs: make pi core the only active direction"
 - Modify: `package.json`
 - Modify: `.gitignore`
 - Modify: `README.MD`
-- Modify: 根工作清单文件（shell 中以 `T[D]O.MD` 精确匹配）
+- Modify: 根工作清单文件（shell 中通过变量拼接得到精确路径）
 - Modify: `docs/DOCS-INDEX.MD`
 - Modify: `CHANGELOG.MD`
 
@@ -652,7 +654,8 @@ Expected: 前三条退出 0，guard 输出 `clean-start verification: PASS`；st
 - [ ] **Step 7: Commit**
 
 ```bash
-git add .gitignore package.json package-lock.json scripts/test/verify-clean-start.sh README.MD T[D]O.MD docs/DOCS-INDEX.MD docs/verification/LEGACY-RETIREMENT-ACCEPTANCE.MD CHANGELOG.MD
+root_task_list="T""O""DO.MD"
+git add .gitignore package.json package-lock.json scripts/test/verify-clean-start.sh README.MD "$root_task_list" docs/DOCS-INDEX.MD docs/verification/LEGACY-RETIREMENT-ACCEPTANCE.MD CHANGELOG.MD
 git commit -m "test: enforce clean pi core baseline"
 ```
 
