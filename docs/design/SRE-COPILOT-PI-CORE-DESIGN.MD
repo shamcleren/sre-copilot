@@ -71,6 +71,25 @@ Phase 0 是 Phase 1 的强制门禁，不允许与 Phase 1 混合提交，也不
 - 不让 Pi 或 LLM 获得任意 shell、SSH 或底层 adapter 写权限。
 - 不把后续阶段的真实 adapter、代码修改或发布能力放进第一阶段实施计划。
 
+### 2.5 Phase 1 minimal implementation profile
+
+第一阶段先按最小可读核心落地，不把完整治理合同一次性实现为框架。第一条 vertical slice 只保留：
+
+```text
+inspect current alert
+  -> build AlertPlan
+  -> summarize add/noop diff
+  -> deterministic confirm decision
+  -> approve with planHash
+  -> fake adapter create
+  -> fake adapter verify
+  -> return audit summary
+```
+
+对应公开函数固定为 `createAlertPlan`、`buildAlertRule`、`summarizeAlertDiff`、`decideAlertPlan`、`hashAlertPlan`、`createSreCore`、`proposeAlert`、`previewAlert`、`approveAlert` 和 `executeAlert`。多步骤状态机、真实风险矩阵、持久化审计、rollback、并发恢复和 Pi tool 注册仍属于后续独立阶段；第一阶段实现计划见 `../superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD`。
+
+该 profile 是完整设计合同的可运行子集，不改变长期不变量：adapter 写入仍只能由 core facade 触发，确认仍绑定计划指纹，apply 后仍必须 verify，Pi 仍不能直接获得 adapter 写接口。
+
 ## 3. 架构原则与信任边界
 
 ### 3.1 分层

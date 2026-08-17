@@ -13,3 +13,8 @@
 
 - 新增 Pi-compatible action runtime 架构设计。
 - 新增 Phase 0 遗留系统退役计划和 Phase 1 fake 告警 vertical slice 实施计划。
+
+### Phase 1 计划收敛（2026-08-17）
+
+- 将 Phase 1 实施计划收敛为最小可读核心：目录职责、函数命名、实现骨架、测试步骤和官方参考地址。
+- 明确 v0 只覆盖单步骤 fake 告警的 inspect → preview → approve → apply → verify 主路径，复杂边界拆到后续独立计划。

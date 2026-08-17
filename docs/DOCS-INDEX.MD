@@ -9,7 +9,7 @@
 ## 实施计划
 
 - `docs/superpowers/plans/2026-08-14-SRE-COPILOT-LEGACY-RETIREMENT-PLAN.MD` - Phase 0 遗留 runtime、工具链和活跃文档退役计划。
-- `docs/superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD` - Phase 1 `demo-service` 5xx 告警 fake vertical slice 实施计划。
+- `docs/superpowers/plans/2026-08-14-SRE-COPILOT-PI-CORE-IMPLEMENTATION-PLAN.MD` - Phase 1 最小 `demo-service` 5xx 告警核心实施计划（目录、函数命名、实现骨架与官方参考）。
 
 ## 验收
 
