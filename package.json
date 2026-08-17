@@ -1,45 +1,14 @@
 {
-  "scripts": {
-    "replay:baseline": "node scripts/test/test-effect-tuning-replay.js",
-    "replay:baseline:gate": "CASES_FILE=eval/effect-tuning-release-gate.json node scripts/test/test-effect-tuning-replay.js",
-    "public:deploy": "make deploy",
-    "public:verify-local": "make verify-local-tests",
-    "runtime:test": "npm run v2:test",
-    "runtime:smoke": "npm run v2:smoke",
-    "runtime:replay": "npm run v2:replay",
-    "runtime:compare": "npm run v2:compare",
-    "runtime:verify": "npm run v2:verify:core",
-    "runtime:verify:core": "npm run v2:verify:core",
-    "runtime:verify:full": "npm run v2:verify:full",
-    "runtime:status": "npm run v2:status",
-    "runtime:handoff": "npm run v2:handoff",
-    "runtime:context": "npm run v2:context",
-    "workflow": "tsx v2/eval/runners/workflow.ts --action=check",
-    "workflow:resume": "tsx v2/eval/runners/workflow.ts --action=resume",
-    "workflow:check": "tsx v2/eval/runners/workflow.ts --action=check",
-    "workflow:verify": "tsx v2/eval/runners/workflow.ts --action=verify",
-    "workflow:refresh": "tsx v2/eval/runners/workflow.ts --action=refresh",
-    "workflow:handoff": "tsx v2/eval/runners/workflow.ts --action=handoff",
-    "v2:test": "tsx --test v2/tests/runtime-regression.test.ts",
-    "v2:smoke": "tsx v2/tests/smoke.ts",
-    "v2:replay": "tsx v2/eval/runners/replay-runner.ts --cases v2/eval/specs/replay/effect-tuning-all.v2.json",
-    "v2:compare": "tsx v2/eval/runners/compare-v1-v2.ts",
-    "v2:verify": "bash scripts/test/verify-v2-regression.sh",
-    "v2:verify:full": "bash scripts/test/verify-v2-regression.sh",
-    "v2:verify:core": "bash scripts/test/verify-v2-core.sh",
-    "v2:status": "bash scripts/test/report-v2-readiness.sh",
-    "v2:handoff": "tsx v2/eval/runners/project-context-status.ts",
-    "v2:context": "tsx v2/eval/runners/project-context-status.ts"
+  "name": "sre-copilot",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
   },
+  "scripts": {},
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@types/node": "^25.5.0",
-    "@types/pg": "^8.20.0",
-    "dotenv": "^17.3.1",
-    "pg": "^8.20.0",
-    "playwright": "^1.58.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
-  },
-  "packageManager": "npm@10.9.2"
+  }
 }

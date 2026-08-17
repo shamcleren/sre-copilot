@@ -141,6 +141,7 @@ Expected: 只 staged 删除 `v2/**` 和 `eval/**`，数量分别为 41 和 8。
 
 ```json
 {
+  "name": "sre-copilot",
   "private": true,
   "type": "module",
   "engines": {
