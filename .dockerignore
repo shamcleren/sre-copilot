@@ -1,8 +1,0 @@
-.git
-.codebuddy
-node_modules
-.env
-.env.*
-*.log
-eval/reports
-v2/eval/reports

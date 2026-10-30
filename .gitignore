@@ -166,3 +166,9 @@ docs/verification/*
 !docs/verification/ARCHIVE/
 docs/verification/ARCHIVE/*
 !docs/verification/ARCHIVE/README.MD
+
+# Handwritten Go learning project
+/bin/
+/coverage.out
+*.test
+.serena/
