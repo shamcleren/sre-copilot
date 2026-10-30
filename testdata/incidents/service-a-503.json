@@ -1,0 +1,11 @@
+{
+  "source": "teaching_fixture",
+  "revision": "v1",
+  "observed_at": "2026-10-30T09:00:00+08:00",
+  "service": "service-a",
+  "environment": "local-example",
+  "http_status": 503,
+  "pods": [{"name": "service-a-example", "phase": "Running", "ready": false}],
+  "ready_endpoints": 0,
+  "unknown": ["readiness failure reason", "recent deployment changes", "downstream health"]
+}

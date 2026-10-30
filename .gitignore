@@ -170,5 +170,6 @@ docs/verification/ARCHIVE/*
 # Handwritten Go learning project
 /bin/
 /coverage.out
+/artifacts/
 *.test
 .serena/
