@@ -19,6 +19,8 @@ type Config struct {
 	APIKey      string
 	Timeout     time.Duration
 	MaxLLMCalls int
+	SkillsRoot  string
+	BKCLIPath   string
 }
 
 // Load treats .env as data, never as a shell script. Exported variables take
@@ -65,6 +67,20 @@ func Load(path string, lookup func(string) (string, bool)) (Config, error) {
 	cfg.MaxLLMCalls, err = strconv.Atoi(get("MAX_LLM_CALLS", "8"))
 	if err != nil || cfg.MaxLLMCalls <= 0 {
 		return Config{}, errors.New("MAX_LLM_CALLS must be a positive integer")
+	}
+	cfg.SkillsRoot = get("SKILLS_ROOT", "")
+	if cfg.SkillsRoot != "" {
+		info, statErr := os.Stat(cfg.SkillsRoot)
+		if statErr != nil || !info.IsDir() {
+			return Config{}, errors.New("SKILLS_ROOT must be an existing directory")
+		}
+	}
+	cfg.BKCLIPath = get("BK_CLI_PATH", "")
+	if cfg.BKCLIPath != "" {
+		info, statErr := os.Stat(cfg.BKCLIPath)
+		if statErr != nil || info.IsDir() {
+			return Config{}, errors.New("BK_CLI_PATH must be an existing bk-cli binary")
+		}
 	}
 	return cfg, nil
 }
