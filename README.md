@@ -6,7 +6,7 @@ Go + tRPC-Agent-Go 的学习工程，目标是亲手实现一个能通过指标�
 
 已准备模型配置、命令行入口、tRPC Agent/Runner 接线、取消与超时、结构化日志、本地模拟接口测试和 CI。依赖固定为 `trpc-agent-go v1.11.2`，项目工具链固定为 Go 1.27.3；Go 1.21+ 在默认 `GOTOOLCHAIN=auto` 下会自动下载使用，不修改系统 Go。
 
-当前只注册一个只读工具 `bk_cli_monitor`。它执行本机 `bk-cli version` 和 `bk-cli monitor` 的允许模块，拒绝 `update`、`--check_update` 和变更类子命令。查询、凭据和权限仍由 `bk-cli` 完成。设置 `SKILLS_ROOT` 后，模型先按需加载其中的 `bk-monitor` 技能，再调用命令；不设置时只靠工具说明和 `--help`。技能原文不进入本仓库。
+当前工具有三个：`bk_cli_monitor` 执行本机 `bk-cli` 的只读查询；`propose_alert_plan` 只生成告警计划；`execute_alert_plan` 在人工批准后写入本地状态并复验。模型不能自己批准。查询、凭据和权限仍由 `bk-cli` 完成。设置 `SKILLS_ROOT` 后，模型先按需加载其中的 `bk-monitor` 技能；技能原文不进入本仓库。CLI 和 `serve` 使用同一个 `app.Run`。
 
 ## 开始开发
 
@@ -66,7 +66,11 @@ internal/sretools/registry.go      你开始写工具的位置
 # SKILLS_ROOT 指向包含 bk-monitor/SKILL.md 的目录；没有技能目录时留空
 # BK_CLI_PATH 可留空，默认使用 PATH 中的 bk-cli
 make run PROMPT='看下最近 15 分钟有没有错误日志'
+./bin/sre-copilot approve --plan-id plan_... --actor oncall
+./bin/sre-copilot serve --addr 127.0.0.1:3001
 ```
+
+`serve` 监听非回环地址时必须设置 `LOCAL_API_TOKEN`。批准记录在 `STATE_DIR`，默认是 `.sre-copilot/`。
 
 ## 结合教材
 

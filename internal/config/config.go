@@ -14,13 +14,15 @@ import (
 )
 
 type Config struct {
-	BaseURL     string
-	Model       string
-	APIKey      string
-	Timeout     time.Duration
-	MaxLLMCalls int
-	SkillsRoot  string
-	BKCLIPath   string
+	BaseURL       string
+	Model         string
+	APIKey        string
+	Timeout       time.Duration
+	MaxLLMCalls   int
+	SkillsRoot    string
+	BKCLIPath     string
+	StateDir      string
+	LocalAPIToken string
 }
 
 // Load treats .env as data, never as a shell script. Exported variables take
@@ -82,5 +84,13 @@ func Load(path string, lookup func(string) (string, bool)) (Config, error) {
 			return Config{}, errors.New("BK_CLI_PATH must be an existing bk-cli binary")
 		}
 	}
+	cfg.StateDir = get("STATE_DIR", "")
+	if cfg.StateDir != "" {
+		info, statErr := os.Stat(cfg.StateDir)
+		if statErr == nil && !info.IsDir() {
+			return Config{}, errors.New("STATE_DIR must be a directory")
+		}
+	}
+	cfg.LocalAPIToken = get("LOCAL_API_TOKEN", "")
 	return cfg, nil
 }

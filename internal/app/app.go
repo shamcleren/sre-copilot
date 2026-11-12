@@ -64,7 +64,7 @@ func Run(parent context.Context, cfg config.Config, prompt string, logger *slog.
 		llmagent.WithMaxLLMCalls(cfg.MaxLLMCalls),
 		llmagent.WithMaxToolIterations(cfg.MaxLLMCalls),
 		llmagent.WithModelCallbacks(modelCallbacks(logger)),
-		llmagent.WithTools(sretools.Registry(cfg.BKCLIPath)),
+		llmagent.WithTools(sretools.Registry(cfg.BKCLIPath, cfg.StateDir)),
 		llmagent.WithInstruction(sretools.Instruction(skillsEnabled)),
 	}
 	if skillsEnabled {
