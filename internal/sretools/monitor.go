@@ -170,7 +170,7 @@ func validateMonitorArg(arg string) error {
 	if strings.ContainsAny(arg, "\x00\r\n") {
 		return errors.New("argument contains a control character")
 	}
-	if strings.Contains(arg, "<") || strings.Contains(arg, ">") {
+	if placeholderPattern.MatchString(arg) {
 		return errors.New("replace angle-bracket placeholders before calling bk-cli")
 	}
 	return nil
@@ -205,10 +205,15 @@ var mutatingMonitorCommands = map[string]bool{
 	"set": true, "put": true,
 }
 
-var secretPattern = regexp.MustCompile(`(?i)(authorization|api[_-]?key|access[_-]?token|refresh[_-]?token|secret)\s*[:=]\s*\S+`)
+// placeholderPattern matches `<context>` or `<业务ID>`, not PromQL comparisons such as `up < 1`.
+var placeholderPattern = regexp.MustCompile(`<[^<>\s][^<>]*>`)
+
+// secretPattern redacts assignment and JSON forms, including a following Bearer token.
+// The value runs through the closing quote, comma, or brace so quoted secrets are removed.
+var secretPattern = regexp.MustCompile(`(?i)(authorization|api[_-]?key|access[_-]?token|refresh[_-]?token|secret)(\s*["']?\s*[:=]\s*["']?)(?:bearer\s+)?[^"'\s,}\]]+`)
 
 func redactSecrets(text string) string {
-	return secretPattern.ReplaceAllString(text, "$1=[redacted]")
+	return secretPattern.ReplaceAllString(text, `${1}${2}[redacted]`)
 }
 
 func (t *MonitorTool) limit(output MonitorOutput) (MonitorOutput, error) {

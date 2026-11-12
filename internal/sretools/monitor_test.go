@@ -14,6 +14,9 @@ func TestValidateMonitorArgs(t *testing.T) {
 		{"monitor", "log", "--help"},
 		{"monitor", "log", "search_logs", "--since", "15m"},
 		{"monitor", "metric", "query", "--dry-run"},
+		{"monitor", "metric", "query", "--promql", "up > 0"},
+		{"monitor", "metric", "query", "--promql", "up < 1"},
+		{"monitor", "metric", "query", "--promql", "up < 1 && up > 0"},
 		{"monitor", "tools", "schema", "--tool", "search_logs"},
 		{"monitor", "tools", "search", "--category", "log"},
 		{"monitor", "space", "search_spaces"},
@@ -34,6 +37,7 @@ func TestValidateMonitorArgs(t *testing.T) {
 		{"monitor", "tools", "download"},
 		{"monitor", "shell", "search"},
 		{"monitor", "log", "search_logs", "--bk_biz_id", "<业务ID>"},
+		{"monitor", "log", "search_logs", "--context", "<context>"},
 		{"monitor", "log", "search_logs", "line\nbreak"},
 		{"monitor", "status", "update"},
 	}
@@ -45,20 +49,27 @@ func TestValidateMonitorArgs(t *testing.T) {
 }
 
 func TestQueryReturnsExitCodeAndRedactsSecrets(t *testing.T) {
+	stdout := `{"ok":false,"api_key":"fixture-secret","access_token":"fixture-token"} api_key=fixture-secret`
+	stderr := "Authorization: Bearer fixture-token\nauthorization: fixture-token"
 	tool := &MonitorTool{
 		bin: "bk-cli",
 		run: func(context.Context, string, []string) ([]byte, []byte, int, error) {
-			return []byte(`{"ok":false,"api_key=fixture-secret"}`), []byte("authorization: fixture-token"), 2, nil
+			return []byte(stdout), []byte(stderr), 2, nil
 		},
 	}
 	output, err := tool.Query(context.Background(), MonitorInput{Args: []string{"version"}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if output.ExitCode != 2 || strings.Contains(output.Stdout, "fixture-secret") || strings.Contains(output.Stderr, "fixture-token") {
-		t.Fatalf("exit or secret leak: %#v", output)
+	if output.ExitCode != 2 {
+		t.Fatalf("exit = %d", output.ExitCode)
 	}
-	if !strings.Contains(output.Stdout, "api_key=[redacted]") || !strings.Contains(output.Stderr, "authorization=[redacted]") {
+	for _, leaked := range []string{"fixture-secret", "fixture-token", "Bearer fixture-token"} {
+		if strings.Contains(output.Stdout, leaked) || strings.Contains(output.Stderr, leaked) {
+			t.Fatalf("secret leak %q in %#v", leaked, output)
+		}
+	}
+	if !strings.Contains(output.Stdout, `[redacted]`) || !strings.Contains(output.Stderr, `[redacted]`) {
 		t.Fatalf("redaction missing: %#v", output)
 	}
 }
@@ -104,6 +115,31 @@ func TestQueryTruncatesLargeOutput(t *testing.T) {
 	body, err := os.ReadFile(output.SavedTo)
 	if err != nil || !strings.Contains(string(body), strings.Repeat("x", inlineLimit)) {
 		t.Fatal("saved output lost the payload")
+	}
+}
+
+func TestLargeSavedOutputRedactsSecrets(t *testing.T) {
+	dir := t.TempDir()
+	secret := `{"api_key":"fixture-secret","access_token":"fixture-token"} Authorization: Bearer fixture-token`
+	tool := &MonitorTool{
+		bin: "bk-cli",
+		dir: dir,
+		run: func(context.Context, string, []string) ([]byte, []byte, int, error) {
+			return []byte(strings.Repeat("x", inlineLimit) + secret), nil, 0, nil
+		},
+	}
+	output, err := tool.Query(context.Background(), MonitorInput{Args: []string{"monitor", "--help"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(output.SavedTo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, leaked := range []string{"fixture-secret", "fixture-token"} {
+		if strings.Contains(string(body), leaked) || strings.Contains(output.Stdout, leaked) {
+			t.Fatalf("saved output leaked %q", leaked)
+		}
 	}
 }
 
