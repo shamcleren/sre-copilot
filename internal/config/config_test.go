@@ -30,6 +30,38 @@ func TestLoadPrecedenceAndDefaults(t *testing.T) {
 	}
 }
 
+func TestOptionalLocalPaths(t *testing.T) {
+	base := map[string]string{
+		"LLM_BASE_URL": "https://example.invalid/v1",
+		"LLM_MODEL":    "fixture-model",
+		"LLM_API_KEY":  "fixture-key",
+	}
+	dir := t.TempDir()
+	values := map[string]string{}
+	for key, value := range base {
+		values[key] = value
+	}
+	values["SKILLS_ROOT"] = dir
+	cfg, err := Load("", lookup(values))
+	if err != nil || cfg.SkillsRoot != dir {
+		t.Fatal(err)
+	}
+	values["SKILLS_ROOT"] = filepath.Join(dir, "missing-skill-root")
+	if _, err = Load("", lookup(values)); err == nil || strings.Contains(err.Error(), "missing-skill-root") {
+		t.Fatal("skills root error echoed the path or was accepted")
+	}
+	bin := filepath.Join(dir, "bk-cli")
+	if err = os.WriteFile(bin, []byte("#!/bin/sh\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	values["SKILLS_ROOT"] = ""
+	values["BK_CLI_PATH"] = bin
+	cfg, err = Load("", lookup(values))
+	if err != nil || cfg.BKCLIPath != bin {
+		t.Fatal(err)
+	}
+}
+
 func TestInvalidConfigDoesNotEchoValues(t *testing.T) {
 	for _, tc := range []struct{ key, value string }{
 		{"LLM_BASE_URL", ""}, {"LLM_MODEL", ""}, {"LLM_API_KEY", ""},

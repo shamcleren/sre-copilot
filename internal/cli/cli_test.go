@@ -31,6 +31,19 @@ func TestDoctorMakesNoRequest(t *testing.T) {
 	}
 }
 
+func TestApproveAndPublicListen(t *testing.T) {
+	state := t.TempDir()
+	var out, logs bytes.Buffer
+	code := Execute(context.Background(), []string{"approve", "--plan-id", "missing", "--actor", "oncall", "--state-dir", state}, &out, &logs, testLookup("http://127.0.0.1:9"))
+	if code != 1 || out.Len() != 0 {
+		t.Fatalf("missing plan code=%d out=%s", code, out.String())
+	}
+	code = Execute(context.Background(), []string{"serve", "--addr", "0.0.0.0:9", "--env-file", ""}, &out, &logs, testLookup("http://127.0.0.1:9"))
+	if code != 2 || !strings.Contains(logs.String(), "LOCAL_API_TOKEN") {
+		t.Fatalf("public listen code=%d logs=%s", code, logs.String())
+	}
+}
+
 func TestProviderFailureDoesNotEchoSecret(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

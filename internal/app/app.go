@@ -18,6 +18,7 @@ import (
 	"trpc.group/trpc-go/trpc-agent-go/model"
 	"trpc.group/trpc-go/trpc-agent-go/model/openai"
 	"trpc.group/trpc-go/trpc-agent-go/runner"
+	"trpc.group/trpc-go/trpc-agent-go/skill"
 )
 
 var (
@@ -56,15 +57,28 @@ func Run(parent context.Context, cfg config.Config, prompt string, logger *slog.
 
 	m := openai.New(cfg.Model, openai.WithAPIKey(cfg.APIKey), openai.WithBaseURL(cfg.BaseURL),
 		openai.WithHTTPClientOptions(openai.WithHTTPClientTimeout(cfg.Timeout)))
-	a := llmagent.New("sre-copilot",
+	skillsEnabled := cfg.SkillsRoot != ""
+	agentOpts := []llmagent.Option{
 		llmagent.WithModel(m),
 		llmagent.WithGenerationConfig(model.GenerationConfig{Stream: false}),
 		llmagent.WithMaxLLMCalls(cfg.MaxLLMCalls),
 		llmagent.WithMaxToolIterations(cfg.MaxLLMCalls),
 		llmagent.WithModelCallbacks(modelCallbacks(logger)),
-		llmagent.WithTools(sretools.Registry()),
-		llmagent.WithInstruction("你是 SRE 学习助手。明确区分事实、假设和缺失证据。没有工具返回的数据时，不声称查询过真实系统；不执行变更操作。"),
-	)
+		llmagent.WithTools(sretools.Registry(cfg.BKCLIPath, cfg.StateDir)),
+		llmagent.WithInstruction(sretools.Instruction(skillsEnabled)),
+	}
+	if skillsEnabled {
+		repo, repoErr := skill.NewFSRepository(cfg.SkillsRoot)
+		if repoErr != nil {
+			return result, errors.New("cannot read skills root")
+		}
+		agentOpts = append(agentOpts,
+			llmagent.WithSkills(repo),
+			llmagent.WithSkillToolProfile(llmagent.SkillToolProfileKnowledgeOnly),
+			llmagent.WithMaxLoadedSkills(1),
+		)
+	}
+	a := llmagent.New("sre-copilot", agentOpts...)
 	r := runner.NewRunner("sre-copilot", a)
 	defer r.Close()
 	events, runErr := r.Run(ctx, "local-user", result.RunID,

@@ -169,6 +169,7 @@ docs/verification/ARCHIVE/*
 
 # Handwritten Go learning project
 /bin/
+/.sre-copilot/
 /coverage.out
 /artifacts/
 *.test

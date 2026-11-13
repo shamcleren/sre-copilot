@@ -6,7 +6,7 @@ Go + tRPC-Agent-Go 的学习工程，目标是亲手实现一个能通过指标�
 
 已准备模型配置、命令行入口、tRPC Agent/Runner 接线、取消与超时、结构化日志、本地模拟接口测试和 CI。依赖固定为 `trpc-agent-go v1.11.2`，项目工具链固定为 Go 1.27.3；Go 1.21+ 在默认 `GOTOOLCHAIN=auto` 下会自动下载使用，不修改系统 Go。
 
-当前工具注册表为空。每次请求使用新的内存会话；持久记忆、知识库、真实观测系统、Trace 导出和诊断逻辑将在学习过程中逐步实现。模型在此阶段只能解释问题，不能查询真实服务。
+当前工具有三个：`bk_cli_monitor` 执行本机 `bk-cli` 的只读查询；`propose_alert_plan` 只生成告警计划；`execute_alert_plan` 在人工批准后写入本地状态并复验。模型不能自己批准。查询、凭据和权限仍由 `bk-cli` 完成。设置 `SKILLS_ROOT` 后，模型先按需加载其中的 `bk-monitor` 技能；技能原文不进入本仓库。CLI 和 `serve` 使用同一个 `app.Run`。
 
 ## 开始开发
 
@@ -56,11 +56,21 @@ internal/sretools/registry.go      你开始写工具的位置
 
 先沿一次请求读完这条路径，运行本地测试，解释“为什么要消费到事件通道关闭”“超时约束哪一段”“没有 Usage 时能断言什么”。助手准备的接线和测试不作为学习者已经掌握的证据。
 
-## 第一份业务代码：只读 503 案例工具
+## 只读观测命令
 
-从 `internal/sretools/registry.go` 开始，亲手实现并注册 `read_incident_snapshot`：输入服务名，返回 `testdata/incidents/service-a-503.json` 的本地教学快照。只允许已知服务，不接受任意路径、Shell 或 URL。未知服务返回可解释错误，支持 context 取消，输出保留来源、版本和时间。
+`internal/sretools/monitor.go` 把 `bk-cli` 收成工具参数，不经过 Shell。允许 `version`、`monitor --help`，以及 `log`、`metric`、`alert`、`apm`、`analysis`、`dashboard`、`resource`、`space`、`status`、`tools`。`tools` 只允许 `schema` 和 `search`。大输出截断后写入仅本人可读的临时文件。模型循环仍是 tRPC `Runner`：同一个模型看到工具结果后再决定下一步。
 
-快照是教学假设，不是真实事故，也没有预先确定根因。先写工具本身的测试，再用模拟模型完成“提出工具调用 → 执行 → 按 tool_call_id 回填 → 模型继续 → 最终回答”。核对 Agent 不能把快照没有的证据编造成查询结果。当前只推进这一个工具，随后才接指标、检索和记忆。
+本机准备：
+
+```sh
+# SKILLS_ROOT 指向包含 bk-monitor/SKILL.md 的目录；没有技能目录时留空
+# BK_CLI_PATH 可留空，默认使用 PATH 中的 bk-cli
+make run PROMPT='看下最近 15 分钟有没有错误日志'
+./bin/sre-copilot approve --plan-id plan_... --actor oncall
+./bin/sre-copilot serve --addr 127.0.0.1:3001
+```
+
+`serve` 监听非回环地址时必须设置 `LOCAL_API_TOKEN`。批准记录在 `STATE_DIR`，默认是 `.sre-copilot/`。
 
 ## 结合教材
 
